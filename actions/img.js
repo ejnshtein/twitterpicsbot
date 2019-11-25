@@ -17,6 +17,7 @@ composer.action(/allimg:(\S+)\/([0-9]+)/i, async ctx => {
         parse_mode: 'HTML'
       }))
     )
+    await ctx.deleteMessage()
   }
   ctx.answerCbQuery('')
 })

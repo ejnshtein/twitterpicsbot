@@ -29,10 +29,6 @@ composer.hears(/twitter\.com\/(.+)\/status\/([0-9]+)/i, async ctx => {
             {
               text: 'Share',
               switch_inline_query: `${username}/${tweetId}`
-            },
-            {
-              text: 'Delete',
-              callback_data: 'delete'
             }
           ]
         ]
