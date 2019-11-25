@@ -54,9 +54,9 @@ composer.inlineQuery(
     return ctx.answerInlineQuery(result, options)
   }))
 
-composer.inlineQuery(/.+/ig, ctx => {
-  console.log(ctx)
-  return ctx.answerInlineQuery([])
-})
+// composer.inlineQuery(/.+/ig, ctx => {
+//   console.log(ctx)
+//   return ctx.answerInlineQuery([])
+// })
 
 module.exports = composer.middleware()
