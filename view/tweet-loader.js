@@ -1,6 +1,6 @@
 const { parseTweet } = require('../parser')
 
-module.exports = async (tweetId, username, { description = false }) => {
+module.exports = async (tweetId, username, options = { description: false }) => {
   const res = await parseTweet(`https://twitter.com/${username || 'elonmusk'}/status/${tweetId}`)
 
   return {
