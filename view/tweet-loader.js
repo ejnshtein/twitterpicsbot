@@ -1,12 +1,15 @@
 const { parseTweet } = require('../parser')
 
-module.exports = async (tweetId, username) => {
+module.exports = async (tweetId, username, { description = false }) => {
   const res = await parseTweet(`https://twitter.com/${username || 'elonmusk'}/status/${tweetId}`)
 
   return {
     photo: res.images.length ? res.images[0] : undefined,
     video: res.video,
-    text: `${res.video ? `<a href="${res.url}">&#8203;</a>` : ''}<a href="${res.url}">${res.title}</a>`,
+    text: `${
+      res.video
+      ? `<a href="${res.url}">&#8203;</a>`
+      : ''}<a href="${res.url}">${res.title}</a>${description ? `\n\n${res.description}` : ''}`,
     response: res
   }
 }

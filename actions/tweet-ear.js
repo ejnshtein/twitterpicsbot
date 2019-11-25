@@ -5,7 +5,7 @@ const tweetLoader = require('../view/tweet-loader')
 
 composer.hears(/twitter\.com\/(.+)\/status\/([0-9]+)/i, async ctx => {
   const [_, username, tweetId] = ctx.match
-  const { photo, text, response } = await tweetLoader(tweetId, username)
+  const { photo, text, response } = await tweetLoader(tweetId, username, { description: true })
 
   try {
     await ctx.replyWithChatAction('upload_photo')
