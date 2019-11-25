@@ -9,7 +9,7 @@ module.exports = async (tweetId, username, options = { description: false }) => 
     text: `${
       res.video
       ? `<a href="${res.url}">&#8203;</a>`
-      : ''}<a href="${res.url}">${res.title}</a>${description ? `\n\n${res.description}` : ''}`,
+      : ''}<a href="${res.url}">${res.title}</a>${options.description ? `\n\n${res.description}` : ''}`,
     response: res
   }
 }
