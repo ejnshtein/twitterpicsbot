@@ -21,7 +21,7 @@ composer.hears(/twitter\.com\/(.+)\/status\/([0-9]+)/i, async ctx => {
             ? [
               {
                 text: `Load ${response.images.length} images`,
-                callback_data: `allimg:${tweetId}`
+                callback_data: `allimg:${username}/${tweetId}`
               }
             ]
             : [],
