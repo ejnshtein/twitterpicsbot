@@ -20,7 +20,10 @@ const catchThrow = fn => async ctx => {
 }
 
 composer.inlineQuery(
-  /twitter\.com\/(\S+)\/status\/([0-9]+)/i,
+  [
+    /twitter\.com\/(\S+)\/status\/([0-9]+)/i,
+    /(\S+)\/([0-9]+)/i
+  ],
   catchThrow(async ctx => {
     const [_, username, tweetId] = ctx.match
 
