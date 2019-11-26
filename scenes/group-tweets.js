@@ -5,6 +5,7 @@ const Scene = require('telegraf/scenes/base')
 
 const tweetLoader = require('../view/tweet-loader')
 const { templates, sleep } = require('../lib')
+const { onlyPrivate } = require('../middlewares')
 
 const composer = new Composer()
 
@@ -42,17 +43,24 @@ groupTweets.hears(
       .reduce(
         (acc, tweet, index) => {
           if (acc.length) {
-            if (acc[acc.length - 1].images.length < 10 && acc[acc.length - 1].images.length + tweet.images.length < 10) {
+            if (acc[acc.length - 1].images.length <= 10 && acc[acc.length - 1].images.length + tweet.images.length <= 10) {
               const lastAlbum = acc[acc.length - 1]
               const lastImgId = lastAlbum.images.length
               lastAlbum.images = lastAlbum.images.concat(tweet.images)
-              lastAlbum.caption += `, <a href="${tweet.url}">${lastImgId + 1}${tweet.images.length > 1 ? `-${lastImgId + tweet.images.length + 1}` : ''} sauce</a>`
+              lastAlbum.caption += `\n<a href="${tweet.url}">${lastImgId + 1}${tweet.images.length > 1 ? `-${lastImgId + tweet.images.length}` : ''} ${tweet.title}</a>`
+            } else {
+              acc.push(
+                {
+                  images: tweet.images,
+                  caption: `<a href="${tweet.url}">1${tweet.images.length > 1 ? `-${tweet.images.length}` : ''} ${tweet.title}</a>`
+                }
+              )
             }
           } else {
             acc.push(
               {
                 images: tweet.images,
-                caption: `<a href="${tweet.url}">1${tweet.images.length > 1 ? `-${tweet.images.length}` : '' } sauce</a>`
+                caption: `<a href="${tweet.url}">1${tweet.images.length > 1 ? `-${tweet.images.length}` : ''} ${tweet.title}</a>`
               }
             )
           }
@@ -78,18 +86,19 @@ groupTweets.hears(
       }
     }
     leave(ctx)
-    return ctx.telegram.editMessageText(ctx.chat.id, msg.message_id, undefined, 'Done', {
+    ctx.reply('Done, now you can group another group of tweets by pressing /group !', {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: 'ok',
+              text: 'ok!',
               callback_data: 'delete'
             }
           ]
         ]
       }
     })
+    return ctx.telegram.deleteMessage(ctx.chat.id, msg.message_id)
   }
 )
 
@@ -97,6 +106,6 @@ const stage = new Stage([groupTweets], { ttl: 30 })
 composer.use(session())
 composer.use(stage.middleware())
 
-composer.command('group', ctx => ctx.scene.enter('group-tweets'))
+composer.command('group', onlyPrivate, ctx => ctx.scene.enter('group-tweets'))
 
 module.exports = composer.middleware()

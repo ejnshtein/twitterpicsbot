@@ -2,8 +2,9 @@ const Composer = require('telegraf/composer')
 const composer = new Composer()
 
 const tweetLoader = require('../view/tweet-loader')
+const { onlyPrivate } = require('../middlewares')
 
-composer.start(async ctx => {
+composer.start(onlyPrivate, async ctx => {
   if (/^\S+_[0-9]+$/i.test(ctx.startPayload)) {
     const [_, username, tweetId] = ctx.startPayload.match(/^(\S+)_([0-9]+)$/i)
     const { text, response } = await tweetLoader(tweetId, username)
