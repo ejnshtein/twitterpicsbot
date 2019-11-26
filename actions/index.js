@@ -2,7 +2,8 @@ module.exports = bot => {
   const actions = [
     './inline-query',
     './tweet-ear',
-    './img'
+    './img',
+    './delete'
   ]
 
   actions.forEach(action => {
