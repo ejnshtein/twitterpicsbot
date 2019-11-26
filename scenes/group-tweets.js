@@ -22,6 +22,12 @@ groupTweets.hears(
       .map(tweet => tweet.match(/twitter\.com\/(\S+)\/status\/([0-9]+)/i))
     const parsedTweets = []
 
+    let msg
+
+    try {
+      msg = await ctx.reply(`Processing ${tweets.length} tweet${tweets.length > 1 ? 's' : ''}...`)
+    } catch {}
+
     for (const [_, username, tweetId] of tweets) {
       try {
         parsedTweets.push((await tweetLoader(tweetId, username)).response)
@@ -54,7 +60,7 @@ groupTweets.hears(
         },
         []
       )
-    console.log(albums)
+
     for (const album of albums) {
       try {
         await ctx.replyWithMediaGroup(
@@ -72,7 +78,7 @@ groupTweets.hears(
       }
     }
     leave(ctx)
-    return ctx.reply('Done', {
+    return ctx.telegram.editMessageText(ctx.chat.id, msg.message_id, undefined, 'Done', {
       reply_markup: {
         inline_keyboard: [
           [
