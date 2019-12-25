@@ -27,7 +27,9 @@ groupTweets.hears(
 
     try {
       msg = await ctx.reply(`Processing ${tweets.length} tweet${tweets.length > 1 ? 's' : ''}...`)
-    } catch {}
+    } catch (e) {
+      return ctx.reply()
+    }
 
     for (const [_, username, tweetId] of tweets) {
       try {
@@ -85,7 +87,7 @@ groupTweets.hears(
         return ctx.reply(templates.error(e))
       }
     }
-    leave(ctx)
+    leave()(ctx)
     ctx.reply('Done, now you can group another group of tweets by pressing /group !', {
       reply_markup: {
         inline_keyboard: [
