@@ -1,32 +1,28 @@
-const cheerio = require('cheerio')
-const { request } = require('../lib')
+import cheerio from 'cheerio'
+import { request } from '../lib/index.js'
 
-module.exports = {
-  parseTweet: async (url) => {
-    const { data: html } = await request(url, { method: 'GET' })
+export const parseTweet = async (url) => {
+  const { data: html } = await request(url, { method: 'GET' })
 
-    const dom = cheerio.load(html)
+  const response = {}
 
-    const images = dom('head > meta[property="og:image"]').map(function (i, el) {
-      return el.attribs.content
-    }).get()
+  const dom = cheerio.load(html)
 
-    if (images.length === 1 && !/media\/(\S+)\.\S+/i.test(images[0])) {
-      images.pop()
-    }
-    const response = {
-      title: dom('head > meta[property="og:title"]').attr('content'),
-      description: dom('head > meta[property="og:description"]').attr('content'),
-      images,
-      url: dom('head > meta[property="og:url"]').attr('content')
-    }
+  const images = dom('head > meta[property="og:image"]').map((i, el) => el.attribs.content).get()
 
-    if (dom('head > meta[property="og:video:url"]').attr('content')) {
-      response.video = dom('head > meta[property="og:video:url"]').attr('content')
-      response.video_width = dom('head > meta[property="og:video:width"]').attr('content')
-      response.video_heigth = dom('head > meta[property="og:video:height"]').attr('content')
-    }
-
-    return response
+  if (images.length === 1 && !/media\/(\S+)\.\S+/i.test(images[0])) {
+    images.pop()
   }
+  response.title = dom('head > meta[property="og:title"]').attr('content')
+  response.description = dom('head > meta[property="og:description"]').attr('content')
+  response.images = images
+  response.url = url
+
+  if (dom('head > meta[property="og:video:url"]').attr('content')) {
+    response.video = dom('head > meta[property="og:video:url"]').attr('content')
+    response.video_width = dom('head > meta[property="og:video:width"]').attr('content')
+    response.video_heigth = dom('head > meta[property="og:video:height"]').attr('content')
+  }
+
+  return response
 }

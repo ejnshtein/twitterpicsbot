@@ -1,4 +1,6 @@
-const Composer = require('telegraf/composer')
+import { Composer } from 'telegraf-esm'
+import { bot } from '../core/bot.js'
+
 const composer = new Composer()
 
 composer.action(/^delete$/i, async ctx => {
@@ -10,4 +12,4 @@ composer.action(/^delete$/i, async ctx => {
   ctx.answerCbQuery('')
 })
 
-module.exports = composer.middleware()
+bot.use(composer.middleware())

@@ -1,17 +1,11 @@
-const Telegraf = require('telegraf').default
-const bot = new Telegraf(process.env.BOT_TOKEN)
-// const collection = require('./database')
-// const logger = require('./database/logger')
+import Telegraf from 'telegraf-esm'
+import env from '../env.js'
+
+export const bot = new Telegraf(env.BOT_TOKEN)
 
 bot.telegram.getMe()
   .then(botInfo => {
     bot.options.username = botInfo.username
   })
-
-// bot.context.db = collection
-
-// bot.use(logger())
-
-module.exports = bot
 
 bot.startPolling()

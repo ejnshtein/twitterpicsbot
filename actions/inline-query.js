@@ -1,20 +1,21 @@
-const Composer = require('telegraf/composer')
-const composer = new Composer()
+import { Composer } from 'telegraf-esm'
+import tweetLoader from '../view/tweet-loader.js'
+import { bot } from '../core/bot.js'
 
-const tweetLoader = require('../view/tweet-loader')
+const composer = new Composer()
 
 const catchThrow = fn => async ctx => {
   if (fn.then) {
     try {
       await fn(ctx)
     } catch (e) {
-      console.log('Error: ', e)
+      return ctx.answerInlineQuery(sendError(e))
     }
   } else {
     try {
       fn(ctx)
     } catch (e) {
-      console.log(e)
+      return ctx.answerInlineQuery(sendError(e))
     }
   }
 }
@@ -54,9 +55,16 @@ composer.inlineQuery(
     return ctx.answerInlineQuery(result, options)
   }))
 
-// composer.inlineQuery(/.+/ig, ctx => {
-//   console.log(ctx)
-//   return ctx.answerInlineQuery([])
-// })
+const sendError = error => [
+  {
+    type: 'article',
+    id: '1',
+    title: 'Error!',
+    description: `Something went wrong... ${error.message}`,
+    input_message_content: {
+      message_text: `Something went wrong... ${error.message}`
+    }
+  }
+]
 
-module.exports = composer.middleware()
+bot.use(composer.middleware())

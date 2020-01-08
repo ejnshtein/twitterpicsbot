@@ -1,6 +1,2 @@
-require('./env')
-const bot = require('./core/bot')
-
-require('./scenes')(bot)
-require('./actions')(bot)
-require('./commands')(bot)
+import './actions/index.js'
+import './commands/index.js'

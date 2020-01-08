@@ -1,8 +1,9 @@
-const Composer = require('telegraf/composer')
-const composer = new Composer()
+import { Composer } from 'telegraf-esm'
+import tweetLoader from '../view/tweet-loader.js'
+import { onlyPrivate } from '../middlewares/index.js'
+import { bot } from '../core/bot.js'
 
-const tweetLoader = require('../view/tweet-loader')
-const { onlyPrivate } = require('../middlewares')
+const composer = new Composer()
 
 composer.start(onlyPrivate, async ctx => {
   if (/^\S+_[0-9]+$/i.test(ctx.startPayload)) {
@@ -42,4 +43,4 @@ composer.start(onlyPrivate, async ctx => {
   )
 })
 
-module.exports = composer.middleware()
+bot.use(composer.middleware())
