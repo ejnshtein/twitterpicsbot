@@ -4,6 +4,9 @@
 
 # Commands
 
-`/group` - Group tweet by links into albums (after pressing you have 30 seconds)
+_Empty here..._
 
-Documentaion comming soon...
+# Contact
+
+[Telegram](https://t.me/ejnshtein)  
+[Telegram Group](https://t.me/nyaasi_chat)
