@@ -6,6 +6,8 @@
 
 _Empty here..._
 
+Just send a bunch of tweets to the bot ¯\\_(ツ)_/¯
+
 # Contact
 
 [Telegram](https://t.me/ejnshtein)  

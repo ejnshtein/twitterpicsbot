@@ -1,24 +1,41 @@
 import { Composer } from 'telegraf-esm'
-import tweetLoader from '../view/tweet-loader.js'
+import { getTweet } from '../store/twitter.js'
 import { onlyPrivate } from '../middlewares/index.js'
+import { onLimitExceeded } from './tweet-ear.js'
 import { bot } from '../core/bot.js'
+import { templates } from '../lib/index.js'
 
 const composer = new Composer()
 
 composer.action(
-  /allimg:(\S+)\/([0-9]+)/i,
+  [
+    /allimg:\S+\/([0-9]+)/i,
+    /allimg:([0-9]+)/i
+  ],
   onlyPrivate,
   async ctx => {
-    const [_, username, tweetId] = ctx.match
+    const [_, tweetId] = ctx.match
 
-    const { text, response } = await tweetLoader(tweetId, username)
+    const { error, tweet, type, wait } = await getTweet(tweetId)
 
-    if (response.images.length > 1) {
+    if (error) {
+      throw ctx.answerCbQuery(templates.error(error), true)
+    }
+
+    if (type === 'limit exceeded') {
+      return ctx.answerCbQuery(`Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} minutes`, true)
+    }
+
+    const images = tweet.entities.media
+      .filter(({ type }) === 'photo')
+      .map(({ media_url_https }) => media_url_https)
+
+    if (images.length > 1) {
       await ctx.replyWithMediaGroup(
-        response.images.map((imgUrl, index) => ({
+        images.map((imgUrl, index) => ({
           type: 'photo',
           media: imgUrl,
-          caption: index === 0 ? text : '',
+          caption: index === 0 ? `<a href="https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}">${tweet.user.name}</a>` : '',
           parse_mode: 'HTML'
         }))
       )

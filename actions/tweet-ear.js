@@ -1,11 +1,16 @@
 import { Composer } from 'telegraf-esm'
 
-import tweetLoader from '../view/tweet-loader.js'
 import { templates, sleep } from '../lib/index.js'
 import { onlyPrivate } from '../middlewares/index.js'
 import { bot } from '../core/bot.js'
+import { getTweet } from '../store/twitter.js'
 
 const composer = new Composer()
+
+export const onLimitExceeded = ({ tweets, wait }) => {
+  const text = `Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} minutes.`
+  return `${text}\n\nTweets list:\n${tweets.map(([url]) => url).join('\n')}`
+}
 
 const sendTweets = async ({
   chat,
@@ -15,8 +20,8 @@ const sendTweets = async ({
   replyWithMediaGroup
 }) => {
   const tweets = message.text.match(/twitter\.com\/.+\/status\/[0-9]+/ig)
-    .map(tweet => tweet.match(/twitter\.com\/(\S+)\/status\/([0-9]+)/i))
-  const parsedTweets = []
+    .map(tweet => tweet.match(/twitter\.com\/\S+\/status\/([0-9]+)/i))
+  const receivedTweets = []
 
   const originalTweetsLength = tweets.length
 
@@ -28,54 +33,72 @@ const sendTweets = async ({
     return reply(templates.error(e))
   }
 
-  for (const [_, username, tweetId] of tweets) {
-    try {
-      const { response } = await tweetLoader(tweetId, username)
-      parsedTweets.push(response)
-      await sleep(600)
-    } catch (e) {
-      console.log(e)
-      return reply(templates.error(e))
+  for (const [_, tweetId] of tweets) {
+    const response = await getTweet(tweetId)
+    switch (true) {
+      case response.ok: {
+        receivedTweets.push(response.tweet)
+        break
+      }
+      case response.type === 'limit exceeded': {
+        return reply(
+          onLimitExceeded({ tweets, wait: response.wait }),
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'Resend tweets',
+                    callback_data: 'tweets'
+                  }
+                ]
+              ]
+            }
+          }
+        )
+      }
+      case response.type === 'error': {
+        console.log(response.error)
+        return reply(templates.error(response.error))
+      }
     }
   }
 
-  const albums = parsedTweets
-    .filter(tweet => tweet.images.length)
+  const tweetsWithMedia = receivedTweets
+    .filter(tweet => tweet.entities.media.length > 0 && tweet.entities.media.some(({ type }) => type === 'photo'))
+    .map(tweet => {
+      tweet.entities.media = tweet.entities.media.filter(({ type }) => type === 'photo')
+      return tweet
+    })
+
+  const albums = tweetsWithMedia
     .reduce(
-      (acc, tweet, index) => {
+      (acc, { id_str, user, entities }, index) => {
+        const images = entities.media.map(({ media_url_https }) => media_url_https)
+        const tw = {
+          images: images.map(image => ({ url: image, filename: 'image' })),
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${id_str}">1-${images.length} ${user.name}</a>`
+        }
         if (acc.length) {
-          if (acc[acc.length - 1].images.length <= 10 && acc[acc.length - 1].images.length + tweet.images.length <= 10) {
+          if (acc[acc.length - 1].images.length <= 10 && acc[acc.length - 1].images.length + images.length <= 10) {
             const lastAlbum = acc[acc.length - 1]
             const lastImgId = lastAlbum.images.length
-            lastAlbum.images = lastAlbum.images.concat(tweet.images)
-            lastAlbum.caption += `\n<a href="${tweet.url}">${lastImgId + 1}${tweet.images.length > 1 ? `-${lastImgId + tweet.images.length}` : ''} ${tweet.title}</a>`
+            lastAlbum.images = lastAlbum.images.concat(images)
+            lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${id_str}">${lastImgId + 1}${images.length > 1 ? `-${lastImgId + images.length}` : ''} ${user.name}</a>`
           } else {
-            acc.push(
-              {
-                images: tweet.images.map(image => ({ url: image, filename: 'image' })),
-                caption: `<a href="${tweet.url}">1${tweet.images.length > 1 ? `-${tweet.images.length}` : ''} ${tweet.title}</a>`
-              }
-            )
+            acc.push(tw)
           }
         } else {
-          acc.push(
-            {
-              images: tweet.images.map(image => ({ url: image, filename: 'image' })),
-              caption: `<a href="${tweet.url}">1${tweet.images.length > 1 ? `-${tweet.images.length}` : ''} ${tweet.title}</a>`
-            }
-          )
+          acc.push(tw)
         }
         return acc
       },
       []
     )
-  const sentTweetsLength = parsedTweets
-    .filter(tweet => tweet.images.length)
-    .length
+  const sentTweetsLength = tweetsWithMedia.length
 
-  const getLostTweets = () => parsedTweets
-    .filter(tweet => !tweet.title)
-    .map(tweet => tweet.url)
+  const getLostTweets = () => tweets
+    .filter(([_, tweetId]) => receivedTweets.some(tweet => tweet.id_str !== tweetId))
     .join('\n')
 
   const messageText = `
