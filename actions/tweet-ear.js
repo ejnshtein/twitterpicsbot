@@ -14,6 +14,7 @@ export const onLimitExceeded = ({ tweets, wait }) => {
 
 const sendTweets = async ({
   chat,
+  from,
   reply,
   message,
   telegram,
@@ -34,7 +35,7 @@ const sendTweets = async ({
   }
 
   for (const [_, tweetId] of tweets) {
-    const response = await getTweet(tweetId)
+    const response = await getTweet({ tweetId, fromId: from.id })
     switch (true) {
       case response.ok: {
         receivedTweets.push(response.tweet)
@@ -167,6 +168,7 @@ composer
     async (ctx) => {
       return sendTweets({
         chat: ctx.chat,
+        from: ctx.from,
         reply: ctx.reply,
         message: ctx.message,
         telegram: ctx.telegram,
@@ -182,6 +184,7 @@ composer
         await ctx.answerCbQuery('')
         await sendTweets({
           chat: ctx.chat,
+          from: ctx.from,
           reply: ctx.reply,
           message: ctx.callbackQuery.message,
           telegram: ctx.telegram,

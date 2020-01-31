@@ -8,7 +8,7 @@ const composer = new Composer()
 composer.start(onlyPrivate, async ctx => {
   if ([/^\S+_[0-9]+$/i, /^[0-9]+$/i].some(regex => regex.test(ctx.startPayload))) {
     const [_, tweetId] = ctx.startPayload.match(/([0-9]+)$/i)
-    const { error, tweet, type, wait } = await getTweet(tweetId)
+    const { error, tweet, type, wait } = await getTweet({ tweetId, fromId: ctx.from.id })
 
     if (error) {
       throw error

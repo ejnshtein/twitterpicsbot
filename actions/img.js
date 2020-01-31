@@ -1,7 +1,6 @@
 import { Composer } from 'telegraf-esm'
 import { getTweet } from '../store/twitter.js'
 import { onlyPrivate } from '../middlewares/index.js'
-import { onLimitExceeded } from './tweet-ear.js'
 import { bot } from '../core/bot.js'
 import { templates } from '../lib/index.js'
 
@@ -16,7 +15,7 @@ composer.action(
   async ctx => {
     const [_, tweetId] = ctx.match
 
-    const { error, tweet, type, wait } = await getTweet(tweetId)
+    const { error, tweet, type, wait } = await getTweet({ tweetId, fromId: ctx.from.id })
 
     if (error) {
       throw ctx.answerCbQuery(templates.error(error), true)

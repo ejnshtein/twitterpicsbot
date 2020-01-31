@@ -64,11 +64,12 @@ export const store = createStore({
   }))
 
 export const getTweet = createEffect('get tweet', {
-  handler: async (tweetId) => {
+  handler: async ({ tweetId, fromId }) => {
     const state = store.getState()
 
     const tweetInDb = await collection('tweets').findOne({ id: tweetId })
     if (tweetInDb) {
+      await collection('users').updateOne({ id: fromId }, { $addToSet: { tweets: tweetInDb.id } })
       return {
         ok: true,
         tweet: tweetInDb.tweet
@@ -77,10 +78,8 @@ export const getTweet = createEffect('get tweet', {
     if (state.remaining > 0) {
       try {
         const tweet = await getTweetFromTwitter(tweetId)
-        await collection('tweets').create({
-          id: tweet.id_str,
-          tweet
-        })
+        await collection('tweets').create({ id: tweet.id_str, tweet })
+        await collection('users').updateOne({ id: fromId }, { $addToSet: { tweets: tweet.id_str } })
         await sleep(1000)
         reduceRemaining()
         return {

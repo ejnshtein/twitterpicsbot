@@ -29,7 +29,7 @@ composer.inlineQuery(
   catchThrow(async ctx => {
     const [_, tweetId] = ctx.match
 
-    const { error, tweet, type, wait } = await getTweet(tweetId)
+    const { error, tweet, type, wait } = await getTweet({ tweetId, fromId: ctx.from.id })
 
     if (error) {
       throw error
