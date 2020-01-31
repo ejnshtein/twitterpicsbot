@@ -1,5 +1,4 @@
 import { Composer } from 'telegraf-esm'
-
 import { templates, sleep } from '../lib/index.js'
 import { onlyPrivate } from '../middlewares/index.js'
 import { bot } from '../core/bot.js'
@@ -66,16 +65,16 @@ const sendTweets = async ({
   }
 
   const tweetsWithMedia = receivedTweets
-    .filter(tweet => tweet.entities.media.length > 0 && tweet.entities.media.some(({ type }) => type === 'photo'))
+    .filter(tweet => tweet.extended_entities.media.length > 0 && tweet.extended_entities.media.some(({ type }) => type === 'photo'))
     .map(tweet => {
-      tweet.entities.media = tweet.entities.media.filter(({ type }) => type === 'photo')
+      tweet.extended_entities.media = tweet.extended_entities.media.filter(({ type }) => type === 'photo')
       return tweet
     })
 
   const albums = tweetsWithMedia
     .reduce(
-      (acc, { id_str, user, entities }, index) => {
-        const images = entities.media.map(({ media_url_https }) => media_url_https)
+      (acc, { id_str, user, extended_entities }, index) => {
+        const images = extended_entities.media.map(({ media_url_https }) => media_url_https)
         const tw = {
           images: images.map(image => ({ url: image, filename: 'image' }))
         }
