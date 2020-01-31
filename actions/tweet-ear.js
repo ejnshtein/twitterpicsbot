@@ -76,19 +76,20 @@ const sendTweets = async ({
       (acc, { id_str, user, entities }, index) => {
         const images = entities.media.map(({ media_url_https }) => media_url_https)
         const tw = {
-          images: images.map(image => ({ url: image, filename: 'image' })),
-          caption: `<a href="https://twitter.com/${user.screen_name}/status/${id_str}">1-${images.length} ${user.name}</a>`
+          images: images.map(image => ({ url: image, filename: 'image' }))
         }
         if (acc.length) {
           if (acc[acc.length - 1].images.length <= 10 && acc[acc.length - 1].images.length + images.length <= 10) {
             const lastAlbum = acc[acc.length - 1]
             const lastImgId = lastAlbum.images.length
             lastAlbum.images = lastAlbum.images.concat(images)
-            lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${id_str}">${lastImgId + 1}${images.length > 1 ? `-${lastImgId + images.length}` : ''} ${user.name}</a>`
+            lastAlbum.caption += `, <a href="https://twitter.com/${user.screen_name}/status/${id_str}">${lastImgId + 1}${images.length > 1 ? `-${lastImgId + images.length}` : ''} ${user.name}</a>`
           } else {
+            tw.caption = `<a href="https://twitter.com/${user.screen_name}/status/${id_str}">1${images.length > 1 ? `-${images.length}` : ''} ${user.name}</a>`
             acc.push(tw)
           }
         } else {
+          tw.caption = `<a href="https://twitter.com/${user.screen_name}/status/${id_str}">1${images.length > 1 ? `-${images.length}` : ''} ${user.name}</a>`
           acc.push(tw)
         }
         return acc
