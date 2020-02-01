@@ -101,11 +101,12 @@ const sendTweets = async ({
 
   const getLostTweets = () => tweets
     .filter(([_, tweetId]) => !tweetsWithMedia.some(tweet => tweet.id_str === tweetId))
+    .map(([_]) => _)
     .join('\n')
 
   const messageText = `
 Received ${originalTweetsLength} tweet${originalTweetsLength > 1 ? 's' : ''}
-Sent ${sentTweetsLength} tweet${sentTweetsLength > 1 ? 's' : ''}
+Sent ${sentTweetsLength} tweet${sentTweetsLength > 1 ? 's' : ''} (Probably they do not contain photos.)
 Your success - ${((sentTweetsLength / originalTweetsLength) * 100).toFixed(0)}%
 ${originalTweetsLength - sentTweetsLength > 0 ? `Lost tweets:\n${getLostTweets()}` : ''}
   `
