@@ -65,7 +65,8 @@ const sendTweets = async ({
   }
 
   const tweetsWithMedia = receivedTweets
-    .filter(tweet => tweet.extended_entities.media.length > 0 && tweet.extended_entities.media.some(({ type }) => type === 'photo'))
+    .filter(tweet => tweet.extended_entities && tweet.extended_entities.media.length > 0)
+    .filter(tweet => tweet.extended_entities.media.some(({ type }) => type === 'photo'))
     .map(tweet => {
       tweet.extended_entities.media = tweet.extended_entities.media.filter(({ type }) => type === 'photo')
       return tweet
@@ -99,7 +100,7 @@ const sendTweets = async ({
   const sentTweetsLength = tweetsWithMedia.length
 
   const getLostTweets = () => tweets
-    .filter(([_, tweetId]) => receivedTweets.some(tweet => tweet.id_str !== tweetId))
+    .filter(([_, tweetId]) => !tweetsWithMedia.some(tweet => tweet.id_str === tweetId))
     .join('\n')
 
   const messageText = `
@@ -165,14 +166,18 @@ composer
     /twitter\.com\/\S+\/status\/[0-9]+/i,
     onlyPrivate,
     async (ctx) => {
-      return sendTweets({
-        chat: ctx.chat,
-        from: ctx.from,
-        reply: ctx.reply,
-        message: ctx.message,
-        telegram: ctx.telegram,
-        replyWithMediaGroup: ctx.replyWithMediaGroup
-      })
+      try {
+        await sendTweets({
+          chat: ctx.chat,
+          from: ctx.from,
+          reply: ctx.reply,
+          message: ctx.message,
+          telegram: ctx.telegram,
+          replyWithMediaGroup: ctx.replyWithMediaGroup
+        })
+      } catch (e) {
+        return ctx.reply(templates.error(e))
+      }
     }
   )
   .action(
@@ -180,7 +185,6 @@ composer
     onlyPrivate,
     async (ctx) => {
       try {
-        await ctx.answerCbQuery('')
         await sendTweets({
           chat: ctx.chat,
           from: ctx.from,
@@ -189,9 +193,10 @@ composer
           telegram: ctx.telegram,
           replyWithMediaGroup: ctx.replyWithMediaGroup
         })
+        await ctx.answerCbQuery('')
         await ctx.deleteMessage()
       } catch (e) {
-        return ctx.reply(templates.error(e))
+        return ctx.answerCbQuery(templates.error(e))
       }
     }
   )

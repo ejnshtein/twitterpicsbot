@@ -48,7 +48,7 @@ collections.forEach(collection => {
   connection.model(collection.name, collection.schema)
 })
 
-export const getCollection = collectionName => {
+export default collectionName => {
   const collection = collections.find(el => el.name === collectionName)
   if (collection) {
     return connection.model(collection.name, collection.schema)
@@ -56,5 +56,3 @@ export const getCollection = collectionName => {
     throw new Error('Collection not found')
   }
 }
-
-export default getCollection
