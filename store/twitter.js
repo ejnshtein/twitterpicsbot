@@ -69,7 +69,7 @@ export const getTweet = createEffect('get tweet', {
 
     const tweetInDb = await collection('tweets').findOne({ id: tweetId })
     if (tweetInDb) {
-      await collection('users').updateOne({ id: fromId }, { $addToSet: { tweets: tweetInDb.id } })
+      await collection('tweets').updateOne({ id: tweetId }, { $addToSet: { users: fromId } })
       return {
         ok: true,
         tweet: tweetInDb.tweet
@@ -78,8 +78,7 @@ export const getTweet = createEffect('get tweet', {
     if (state.remaining > 0) {
       try {
         const tweet = await getTweetFromTwitter(tweetId)
-        await collection('tweets').create({ id: tweet.id_str, tweet })
-        await collection('users').updateOne({ id: fromId }, { $addToSet: { tweets: tweet.id_str } })
+        await collection('tweets').create({ id: tweet.id_str, tweet, users: [fromId] })
         await sleep(1000)
         reduceRemaining()
         return {

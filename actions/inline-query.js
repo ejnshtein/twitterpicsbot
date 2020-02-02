@@ -65,6 +65,41 @@ composer.inlineQuery(
     return ctx.answerInlineQuery(result, options)
   }))
 
+composer.on(
+  'inline_query',
+  catchThrow(async ctx => {
+    // console.log(ctx.state)
+    const skip = Number.parseInt(ctx.inlineQuery.offset) || 0
+    const result = await ctx.db('tweets')
+      .find({ users: ctx.from.id })
+      .limit(5)
+      .skip(skip)
+      .exec()
+    return ctx.answerInlineQuery(
+      result.reduce((acc, tweet) => {
+        return acc.concat(
+          tweet.tweet.extended_entities.media.map(
+            ({ id_str, media_url_https, sizes }) => ({
+              type: 'photo',
+              id: id_str,
+              photo_url: media_url_https,
+              thumb_url: media_url_https + '?format=jpg&name=small',
+              photo_width: sizes.small.w,
+              photo_height: sizes.small.h,
+              parse_mode: 'HTML',
+              caption: `<a href="https://twitter.com/${tweet.tweet.user.screen_name}/status/${tweet.tweet.id_str}">${tweet.tweet.user.screen_name}</a>`
+            })
+          )
+        )
+      }, []),
+      {
+        cache_time: 5,
+        is_personal: false,
+        next_offset: `${skip + 5}`
+      }
+    )
+  }))
+
 const sendError = error => [
   {
     type: 'article',

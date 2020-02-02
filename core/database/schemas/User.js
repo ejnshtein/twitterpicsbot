@@ -28,5 +28,8 @@ export const User = new Schema({
   timestamps: {
     updatedAt: 'updated_at',
     createdAt: 'created_at'
+  },
+  toJSON: {
+    virtuals: true
   }
 })

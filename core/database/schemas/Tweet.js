@@ -11,6 +11,10 @@ export const Tweet = new Schema({
   tweet: {
     type: Object,
     required: true
+  },
+  users: {
+    type: [Number],
+    required: true
   }
 }, {
   timestamps: {

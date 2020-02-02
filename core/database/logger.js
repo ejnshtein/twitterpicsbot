@@ -1,13 +1,15 @@
 import collection from './index.js'
 const users = collection('users')
 
-export default async ({ updateType, chat, from, state }, next) => {
+export default async (ctx, next) => {
+  const { updateType, chat, from, state } = ctx
   if (
+    updateType === 'inline_query' ||
     updateType === 'callback_query' ||
     (updateType === 'message' && chat.type === 'private')
   ) {
     const { id, ...userData } = from
-    state.user = await users.findOneAndUpdate(
+    ctx.state.user = await users.findOneAndUpdate(
       {
         id
       },

@@ -27,7 +27,15 @@ const collections = [
   },
   {
     name: 'users',
-    schema: User
+    schema: User,
+    virtual: {
+      populated_tweets: {
+        ref: 'tweets',
+        localField: 'tweets',
+        foreignField: 'id',
+        justOne: false
+      }
+    }
   }
 ]
 
