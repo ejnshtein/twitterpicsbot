@@ -18,11 +18,6 @@ export const User = new Schema({
   last_name: {
     type: String,
     required: false
-  },
-  tweets: {
-    type: [String],
-    required: true,
-    default: []
   }
 }, {
   timestamps: {
