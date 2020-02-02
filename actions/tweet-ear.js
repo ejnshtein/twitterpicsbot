@@ -25,13 +25,7 @@ const sendTweets = async ({
 
   const originalTweetsLength = tweets.length
 
-  let msg
-
-  try {
-    msg = await reply(`Processing ${tweets.length} tweet${tweets.length > 1 ? 's' : ''}...`)
-  } catch (e) {
-    return reply(templates.error(e))
-  }
+  const msg = await reply(`Processing ${tweets.length} tweet${tweets.length > 1 ? 's' : ''}...`)
 
   for (const [_, tweetId] of tweets) {
     const response = await getTweet({ tweetId, fromId: from.id })
@@ -58,8 +52,7 @@ const sendTweets = async ({
         )
       }
       case response.type === 'error': {
-        console.log(response.error)
-        return reply(templates.error(response.error))
+        throw response.error
       }
     }
   }
@@ -75,9 +68,9 @@ const sendTweets = async ({
   const albums = tweetsWithMedia
     .reduce(
       (acc, { id_str, user, extended_entities }, index) => {
-        const images = extended_entities.media.map(({ media_url_https }) => media_url_https)
+        const images = extended_entities.media.map(({ media_url_https }) => media_url_https).map(image => ({ url: image, filename: 'image' }))
         const tw = {
-          images: images.map(image => ({ url: image, filename: 'image' }))
+          images
         }
         if (acc.length) {
           if (acc[acc.length - 1].images.length <= 10 && acc[acc.length - 1].images.length + images.length <= 10) {
@@ -106,57 +99,48 @@ const sendTweets = async ({
 
   const messageText = `
 Received ${originalTweetsLength} tweet${originalTweetsLength > 1 ? 's' : ''}
-Sent ${sentTweetsLength} tweet${sentTweetsLength > 1 ? 's' : ''} (Probably they do not contain photos.)
+Sent ${sentTweetsLength} tweet${sentTweetsLength > 1 ? 's' : ''}
 Your success - ${((sentTweetsLength / originalTweetsLength) * 100).toFixed(0)}%
-${originalTweetsLength - sentTweetsLength > 0 ? `Lost tweets:\n${getLostTweets()}` : ''}
+${originalTweetsLength - sentTweetsLength > 0 ? `Lost tweets (Probably they do not contain photos.):\n${getLostTweets()}` : ''}
   `
 
   for (const album of albums) {
-    try {
-      await replyWithMediaGroup(
-        album.images.map((image, index) => ({
-          type: 'photo',
-          media: image,
-          caption: index === 0 ? album.caption : undefined,
-          parse_mode: 'HTML'
-        }))
-      )
-
-      await sleep(1000)
-    } catch (e) {
-      return reply(templates.error(e))
-    }
+    await replyWithMediaGroup(
+      album.images.map((image, index) => ({
+        type: 'photo',
+        media: image,
+        caption: index === 0 ? album.caption : undefined,
+        parse_mode: 'HTML'
+      }))
+    )
+    await sleep(1000)
   }
 
-  try {
-    await reply(
-      messageText,
-      {
-        disable_web_page_preview: true,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: 'ok',
-                callback_data: 'delete'
-              }
-            ],
-            ...(
-              originalTweetsLength - sentTweetsLength > 0 ? [
-                [
-                  {
-                    text: 'Resend lost tweets',
-                    callback_data: 'tweets'
-                  }
-                ]
-              ] : []
-            )
-          ]
-        }
-      })
-  } catch (e) {
-    return reply(templates.error(e))
-  }
+  await reply(
+    messageText,
+    {
+      disable_web_page_preview: true,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'ok',
+              callback_data: 'delete'
+            }
+          ],
+          ...(
+            originalTweetsLength - sentTweetsLength > 0 ? [
+              [
+                {
+                  text: 'Resend lost tweets',
+                  callback_data: 'tweets'
+                }
+              ]
+            ] : []
+          )
+        ]
+      }
+    })
 
   return telegram.deleteMessage(chat.id, msg.message_id)
 }
@@ -177,6 +161,7 @@ composer
           replyWithMediaGroup: ctx.replyWithMediaGroup
         })
       } catch (e) {
+        console.log(JSON.stringify(e))
         return ctx.reply(templates.error(e))
       }
     }
