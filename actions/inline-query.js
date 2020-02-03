@@ -75,11 +75,15 @@ composer.on(
     if (ctx.inlineQuery.offset === 'none') {
       return ctx.answerInlineQuery([])
     }
-    const query = { users: ctx.from.id }
+    const query = {
+      users: ctx.from.id,
+      'tweet.extended_entities': { $exists: true }
+    }
     if (ctx.inlineQuery.query) {
       query['tweet.user.screen_name'] = new RegExp(ctx.inlineQuery.query, 'i')
     }
     const skip = Number.parseInt(ctx.inlineQuery.offset) || 0
+
     const result = await ctx.db('tweets')
       .find(query)
       .limit(12)
