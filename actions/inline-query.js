@@ -39,41 +39,52 @@ composer.inlineQuery(
       throw new Error(`Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} minutes`)
     }
 
-    const images = tweet.entities.media
-      .filter(({ type }) === 'photo')
-      .map(({ media_url_https }) => media_url_https)
-
-    const result = images
-      .map((url, i) => ({
-        type: 'photo',
-        photo_url: url,
-        thumb_url: url,
-        id: 1,
-        caption: i === 0 ? `<a href="https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}">${tweet.user.name}</a>` : '',
-        parse_mode: 'HTML'
-      }))
-    const options = {
-      cache_time: 30
+    if (
+      tweet.extended_entities &&
+      tweet.extended_entities.media.length > 0 &&
+      tweet.extended_entities.media.some(({ type }) => type === 'photo')
+    ) {
+      const images = tweet.extended_entities.media
+        .filter(({ type }) => type === 'photo')
+        .map(({ media_url_https }) => media_url_https)
+      const result = images
+        .map((url, i) => ({
+          type: 'photo',
+          photo_url: url,
+          thumb_url: url,
+          id: `${i}`,
+          caption: i === 0 ? `<a href="https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}">${tweet.user.name}</a>` : '',
+          parse_mode: 'HTML'
+        }))
+      const options = {
+        cache_time: 30
+      }
+      if (images.length > 1) {
+        options.switch_pm_text = 'Get an album'
+        options.switch_pm_parameter = `${tweetId}`
+      }
+      return ctx.answerInlineQuery(result, options)
+    } else {
+      return ctx.answerInlineQuery([])
     }
-
-    result.push(
-    )
-    if (images.length > 1) {
-      options.switch_pm_text = 'Get an album'
-      options.switch_pm_parameter = `${tweetId}`
-    }
-    return ctx.answerInlineQuery(result, options)
   }))
 
 composer.on(
   'inline_query',
   catchThrow(async ctx => {
-    // console.log(ctx.state)
+    if (ctx.inlineQuery.offset === 'none') {
+      return ctx.answerInlineQuery([])
+    }
+    const query = { users: ctx.from.id }
+    if (ctx.inlineQuery.query) {
+      query['tweet.user.screen_name'] = new RegExp(ctx.inlineQuery.query, 'i')
+    }
     const skip = Number.parseInt(ctx.inlineQuery.offset) || 0
     const result = await ctx.db('tweets')
-      .find({ users: ctx.from.id })
-      .limit(5)
-      .skip(skip)
+      .find(query)
+      .limit(12)
+      .skip(skip * 12)
+      .sort('-_id')
       .exec()
     return ctx.answerInlineQuery(
       result.reduce((acc, tweet) => {
@@ -95,7 +106,7 @@ composer.on(
       {
         cache_time: 5,
         is_personal: false,
-        next_offset: `${skip + 5}`
+        next_offset: result.length < 12 ? 'none' : `${skip + 1}`
       }
     )
   }))
