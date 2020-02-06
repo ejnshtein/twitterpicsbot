@@ -77,7 +77,7 @@ const sendTweets = async ({
             const lastAlbum = acc[acc.length - 1]
             const lastImgId = lastAlbum.images.length
             lastAlbum.images = lastAlbum.images.concat(images)
-            lastAlbum.caption += `, <a href="https://twitter.com/${user.screen_name}/status/${id_str}">${lastImgId + 1}${images.length > 1 ? `-${lastImgId + images.length}` : ''} ${user.name}</a>`
+            lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${id_str}">${lastImgId + 1}${images.length > 1 ? `-${lastImgId + images.length}` : ''} ${user.name}</a>`
           } else {
             tw.caption = `<a href="https://twitter.com/${user.screen_name}/status/${id_str}">1${images.length > 1 ? `-${images.length}` : ''} ${user.name}</a>`
             acc.push(tw)
