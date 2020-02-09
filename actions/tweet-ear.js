@@ -177,7 +177,7 @@ const sendTweets = async ({
         )
       }
       case response.type === 'error': {
-        throw response.error
+        throw new Error(`Status ${tweetId} error: ${JSON.stringify(response.error)}`)
       }
     }
   }
@@ -248,7 +248,7 @@ composer
   .hears(
     /twitter\.com\/\S+\/status\/[0-9]+/i,
     onlyPrivate,
-    async (ctx) => {
+    async ctx => {
       try {
         await sendTweets({
           chat: ctx.chat,
@@ -260,21 +260,54 @@ composer
           sendAnimation: (animation, extra) => ctx.telegram.sendAnimation(ctx.chat.id, animation, extra)
         })
       } catch (e) {
-        console.log(JSON.stringify(e))
-        return ctx.reply(templates.error(e))
+        // console.log(JSON.stringify(e))
+        return ctx.reply(templates.error(e), {
+          reply_to_message_id: ctx.message.message_id,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Try again',
+                  callback_data: 'tweets_retry'
+                }
+              ]
+            ]
+          }
+        })
       }
     }
   )
   .action(
     'tweets',
     onlyPrivate,
-    async (ctx) => {
+    async ctx => {
       try {
         await sendTweets({
           chat: ctx.chat,
           from: ctx.from,
           reply: ctx.reply,
           message: ctx.callbackQuery.message,
+          telegram: ctx.telegram,
+          replyWithMediaGroup: ctx.replyWithMediaGroup,
+          sendAnimation: (animation, extra) => ctx.telegram.sendAnimation(ctx.chat.id, animation, extra)
+        })
+        await ctx.answerCbQuery('')
+        await ctx.deleteMessage()
+      } catch (e) {
+        return ctx.answerCbQuery(templates.error(e))
+      }
+    }
+  )
+  .action(
+    'tweets_retry',
+    onlyPrivate,
+    async ctx => {
+      try {
+        await sendTweets({
+          chat: ctx.chat,
+          from: ctx.from,
+          reply: ctx.reply,
+          message: ctx.callbackQuery.message.reply_to_message,
           telegram: ctx.telegram,
           replyWithMediaGroup: ctx.replyWithMediaGroup,
           sendAnimation: (animation, extra) => ctx.telegram.sendAnimation(ctx.chat.id, animation, extra)
