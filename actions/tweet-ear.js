@@ -7,7 +7,7 @@ import { getTweet } from '../store/twitter.js'
 const composer = new Composer()
 
 export const onLimitExceeded = ({ tweets, wait }) => {
-  const text = `Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} minutes.`
+  const text = `Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} ms.`
   return `${text}\n\nTweets list:\n${tweets.map(([url]) => url).join('\n')}`
 }
 
@@ -160,21 +160,7 @@ const sendTweets = async ({
         break
       }
       case response.type === 'limit exceeded': {
-        return reply(
-          onLimitExceeded({ tweets, wait: response.wait }),
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: 'Resend tweets',
-                    callback_data: 'tweets'
-                  }
-                ]
-              ]
-            }
-          }
-        )
+        throw new Error(onLimitExceeded({ tweets, wait: response.wait }))
       }
       case response.type === 'error': {
         throw new Error(`Status ${tweetId} error: ${JSON.stringify(response.error)}`)

@@ -96,7 +96,7 @@ export const getTweet = createEffect('get tweet', {
       return {
         ok: false,
         type: 'limit exceeded',
-        wait: state.reset.getTime() - Date.now()
+        wait: Date.now() - state.reset.getTime()
       }
     }
   }
