@@ -131,7 +131,7 @@ composer.inlineQuery(
     const isSome = mediaType => tweet.extended_entities.media.some(({ type }) => type === mediaType)
 
     if (isSome('photo')) {
-      return send.albums(tweet)
+      return send.photo(tweet)
     }
 
     if (isSome('animated_gif')) {
