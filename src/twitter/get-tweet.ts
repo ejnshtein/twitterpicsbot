@@ -119,6 +119,7 @@ export const getTweet = async ({
       return {
         ok: false,
         tweet: null,
+        type: 'error',
         error: e
       }
     }

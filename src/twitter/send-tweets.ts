@@ -86,8 +86,8 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
       privateMode: state.user.private_mode
     })
 
-    switch (true) {
-      case error instanceof Error: {
+    switch (type) {
+      case 'error': {
         results.push({
           _: 'error',
           ids: [tweetId],
@@ -95,14 +95,12 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
         })
         break
       }
-      case type === 'limit exceeded': {
+      case 'limit exceeded': {
         throw new Error(
           onLimitExceeded({ tweets, wait })
         )
       }
     }
-
-    console.log(tweet, type, wait, error)
 
     const entities = tweet.entities || tweet.extended_entities
 
