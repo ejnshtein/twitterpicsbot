@@ -55,7 +55,7 @@ composer
           await ctx.deleteMessage()
         } catch (e) {
           console.log(e)
-          return ctx.answerCbQuery(templates.error(e))
+          return ctx.answerCbQuery(templates.error(e), true)
         }
       }
     )
@@ -76,7 +76,7 @@ composer
           await ctx.deleteMessage()
         } catch (e) {
           console.log(e)
-          return ctx.answerCbQuery(templates.error(e))
+          return ctx.answerCbQuery(templates.error(e), true)
         }
       }
     )

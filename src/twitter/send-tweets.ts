@@ -86,14 +86,6 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
       privateMode: state.user.private_mode
     })
 
-    const entities = tweet.extended_entities || tweet.entities
-
-    const isInMedia = (mediaType: string) => entities.media.some(
-      ({ type }) => type === mediaType
-    )
-
-    const user = tweet.user as FullUser
-
     switch (true) {
       case error instanceof Error: {
         results.push({
@@ -108,106 +100,111 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           onLimitExceeded({ tweets, wait })
         )
       }
-      case isInMedia('photo'): {
-        const images = entities.media
-          .filter(({ type }) => type === 'photo')
-          .map(
-            image => ({
-              type: 'photo',
-              thumb: getThumbUrl(image.media_url_https, 'thumb', 'jpg'),
-              url: getThumbUrl(image.media_url_https, 'large', 'jpg'),
-              width: image.sizes.large.w,
-              height: image.sizes.large.h
-            }) as InputMedia
-          )
-        const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
-        const addNewAlbum = () => {
-          results.push({
-            _: 'album',
-            ids: [tweetId],
-            media: [].concat(images),
-            caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${images.length > 1 ? `1-${images.length}` : ''} ${user.name}</a>`
-          })
-        }
-        if (lastAlbumIndex >= 0) {
-          const lastAlbum = results[lastAlbumIndex]
-          if (
-            lastAlbum.media.length >= 0 &&
-            lastAlbum.media.length < 10 &&
-            lastAlbum.media.length + images.length <= 10
-          ) {
-            const lastMediaId = lastAlbum.media.length
-            lastAlbum.media = lastAlbum.media.concat(images)
-            lastAlbum.ids.push(tweetId)
-            lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${images.length > 1 ? `-${lastMediaId + images.length}` : ''} ${user.name}</a>`
-          } else {
-            addNewAlbum()
-          }
+    }
+
+    const entities = tweet.extended_entities || tweet.entities
+
+    const isInMedia = (mediaType: string) => entities.media.some(
+      ({ type }) => type === mediaType
+    )
+
+    const user = tweet.user as FullUser
+    if (isInMedia('photo')) {
+      const images = entities.media
+        .filter(({ type }) => type === 'photo')
+        .map(
+          image => ({
+            type: 'photo',
+            thumb: getThumbUrl(image.media_url_https, 'thumb', 'jpg'),
+            url: getThumbUrl(image.media_url_https, 'large', 'jpg'),
+            width: image.sizes.large.w,
+            height: image.sizes.large.h
+          }) as InputMedia
+        )
+      const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
+      const addNewAlbum = () => {
+        results.push({
+          _: 'album',
+          ids: [tweetId],
+          media: [].concat(images),
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${images.length > 1 ? `1-${images.length}` : ''} ${user.name}</a>`
+        })
+      }
+      if (lastAlbumIndex >= 0) {
+        const lastAlbum = results[lastAlbumIndex]
+        if (
+          lastAlbum.media.length >= 0 &&
+          lastAlbum.media.length < 10 &&
+          lastAlbum.media.length + images.length <= 10
+        ) {
+          const lastMediaId = lastAlbum.media.length
+          lastAlbum.media = lastAlbum.media.concat(images)
+          lastAlbum.ids.push(tweetId)
+          lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${images.length > 1 ? `-${lastMediaId + images.length}` : ''} ${user.name}</a>`
         } else {
           addNewAlbum()
         }
-        break
+      } else {
+        addNewAlbum()
       }
-      case isInMedia('video'): {
-        const videos = entities.media
-          .filter(({ type }) => type === 'video')
-          .map(video => {
-            const { video_url } = getVideoUrl(video.video_info)
-            return {
-              type: 'video',
-              url: video_url,
-              thumb: video.media_url_https,
-              height: video.sizes.large.h,
-              width: video.sizes.large.w
-            } as InputMedia
-          })
-        const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
-        const addNewAlbum = () => {
-          results.push({
-            _: 'album',
-            ids: [tweetId],
-            media: [].concat(videos),
-            caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${videos.length > 1 ? `1-${videos.length}` : ''} ${user.name}</a>`
-          })
-        }
-        if (lastAlbumIndex >= 0) {
-          const lastAlbum = results[lastAlbumIndex]
-          if (
-            lastAlbum.media.length >= 0 &&
-            lastAlbum.media.length < 10 &&
-            lastAlbum.media.length + videos.length <= 10
-          ) {
-            const lastMediaId = lastAlbum.media.length
-            lastAlbum.media = lastAlbum.media.concat(videos)
-            lastAlbum.ids.push(tweetId)
-            lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${videos.length > 1 ? `-${lastMediaId + videos.length}` : ''} ${user.name}</a>`
-          } else {
-            addNewAlbum()
-          }
+    }
+    if (isInMedia('video')) {
+      const videos = entities.media
+        .filter(({ type }) => type === 'video')
+        .map(video => {
+          const { video_url } = getVideoUrl(video.video_info)
+          return {
+            type: 'video',
+            url: video_url,
+            thumb: video.media_url_https,
+            height: video.sizes.large.h,
+            width: video.sizes.large.w
+          } as InputMedia
+        })
+      const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
+      const addNewAlbum = () => {
+        results.push({
+          _: 'album',
+          ids: [tweetId],
+          media: [].concat(videos),
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${videos.length > 1 ? `1-${videos.length}` : ''} ${user.name}</a>`
+        })
+      }
+      if (lastAlbumIndex >= 0) {
+        const lastAlbum = results[lastAlbumIndex]
+        if (
+          lastAlbum.media.length >= 0 &&
+          lastAlbum.media.length < 10 &&
+          lastAlbum.media.length + videos.length <= 10
+        ) {
+          const lastMediaId = lastAlbum.media.length
+          lastAlbum.media = lastAlbum.media.concat(videos)
+          lastAlbum.ids.push(tweetId)
+          lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${videos.length > 1 ? `-${lastMediaId + videos.length}` : ''} ${user.name}</a>`
         } else {
           addNewAlbum()
         }
-        break
+      } else {
+        addNewAlbum()
       }
-      case isInMedia('animated_gif'): {
-        const gifs = entities.media
-          .filter(({ type }) => type === 'animated_gif')
-          .map(gif => ({
-            type: 'gif',
-            url: gif.video_info.variants.pop().url,
-            thumb: gif.media_url_https,
-            height: gif.sizes.large.h,
-            width: gif.sizes.large.w
-          }) as InputMedia)
-        for (const gif of gifs) {
-          results.push({
-            _: 'gif',
-            ids: [tweetId],
-            media: [gif],
-            caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a>`
-          })
-        }
-        break
+    }
+    if (isInMedia('animated_gif')) {
+      const gifs = entities.media
+        .filter(({ type }) => type === 'animated_gif')
+        .map(gif => ({
+          type: 'gif',
+          url: gif.video_info.variants.pop().url,
+          thumb: gif.media_url_https,
+          height: gif.sizes.large.h,
+          width: gif.sizes.large.w
+        }) as InputMedia)
+      for (const gif of gifs) {
+        results.push({
+          _: 'gif',
+          ids: [tweetId],
+          media: [gif],
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a>`
+        })
       }
     }
   }
