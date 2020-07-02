@@ -127,7 +127,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           _: 'album',
           ids: [tweetId],
           media: [].concat(images),
-          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${images.length > 1 ? `1-${images.length}` : ''} ${user.name}</a>`
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${images.length > 1 ? `1-${images.length}` : `${tweets.length > 1 ? '1' : ''}`} ${user.name}</a>`
         })
       }
       if (lastAlbumIndex >= 0) {
@@ -167,7 +167,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           _: 'album',
           ids: [tweetId],
           media: [].concat(videos),
-          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${videos.length > 1 ? `1-${videos.length}` : ''} ${user.name}</a>`
+          caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${videos.length > 1 ? `1-${videos.length}` : `${tweets.length > 1 ? '1' : ''}`} ${user.name}</a>`
         })
       }
       if (lastAlbumIndex >= 0) {
@@ -180,7 +180,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           const lastMediaId = lastAlbum.media.length
           lastAlbum.media = lastAlbum.media.concat(videos)
           lastAlbum.ids.push(tweetId)
-          lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${videos.length > 1 ? `-${lastMediaId + videos.length}` : ''} ${user.name}</a>`
+          lastAlbum.caption += `\n<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${lastMediaId + 1}${videos.length > 1 ? `-${lastMediaId + videos.length}` : `${tweets.length > 1 ? '1' : ''}`} ${user.name}</a>`
         } else {
           addNewAlbum()
         }
