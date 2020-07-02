@@ -53,45 +53,22 @@ composer.on(
       if (ctx.inlineQuery.offset === 'none') {
         return ctx.answerInlineQuery([])
       }
-
-      const extentedEntitiesExists = {
-        'tweet.extended_entities.media': { $exists: true }
-      }
-      const entitiesExists = {
-        'tweet.entities.media': { $exists: true }
-      }
       const query: FindQuery = {
         users: ctx.from.id,
-        $or: [
-          extentedEntitiesExists,
-          entitiesExists
-        ]
+        'tweet.extended_entities.media': { $exists: true }
       }
 
       const { query: userQuery } = ctx.inlineQuery
-      let textSearch = `${userQuery}`
-      if (userQuery.startsWith('videos')) {
-        query['tweet.extended_entities.media'] = { $elemMatch: { type: 'video' } }
-        textSearch = textSearch
-          .replace('videos', '')
-          .replace(/^\s/i, '')
-      } else if (userQuery.startsWith('gifs')) {
-        query['tweet.extended_entities.media'] = { $elemMatch: { type: 'animated_gif' } }
-        textSearch = textSearch
-          .replace('gif', '')
-          .replace(/^\s/i, '')
-      } else if (userQuery.startsWith('photos')) {
-        query['tweet.extended_entities.media'] = { $elemMatch: { type: 'photo' } }
-        textSearch = textSearch
-          .replace('photos', '')
-          .replace(/^\s/i, '')
-      }
       if (userQuery.includes('-u')) {
-        query['tweet.user.screen_name'] = new RegExp(textSearch, 'i')
+        query['tweet.user.screen_name'] = new RegExp(userQuery.replace('-u', '').trim(), 'i')
       } else if (userQuery) {
-        query['tweet.text'] = new RegExp(textSearch, 'i')
+        query['tweet.text'] = new RegExp(userQuery, 'i')
       }
-      const skip = ctx.inlineQuery.offset === '' ? 0 : Number.parseInt(ctx.inlineQuery.offset) || undefined
+      const skip = ctx.inlineQuery.offset === ''
+        ? 0
+        : ctx.inlineQuery.offset === 'none'
+          ? undefined
+          : Number.parseInt(ctx.inlineQuery.offset)
 
       const aggregationQuery: any[] = [
         {
@@ -133,7 +110,7 @@ composer.on(
 
       for (const { tweet } of result) {
         const user = tweet.user as FullUser
-        const entities = tweet.extended_entities || tweet.entities
+        const entities = tweet.extended_entities
         for (const entitie of entities.media) {
           if (entitie.type === 'photo') {
             inlineQueryResults.push({

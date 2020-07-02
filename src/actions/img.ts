@@ -30,7 +30,7 @@ composer.action(
         return ctx.answerCbQuery(`Exceeded the number of requests, please wait ${Math.floor(wait / 1000)} minutes`, true)
       }
 
-      const images = tweet.entities.media
+      const images = tweet.extended_entities.media
         .filter(({ type }) => type === 'photo')
         .map(({ media_url_https }) => media_url_https)
       const user = tweet.user as FullUser

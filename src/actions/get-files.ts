@@ -33,7 +33,7 @@ composer.action(
           )
         }
       }
-      const entities = tweet.entities || tweet.extended_entities
+      const entities = tweet.extended_entities
 
       const user = tweet.user as FullUser
       let i = 0

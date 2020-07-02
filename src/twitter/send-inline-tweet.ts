@@ -39,7 +39,7 @@ export const sendInlineTweet = async (id: string, ctx: TelegrafContext): Promise
     }
   }
 
-  const entities = tweet.extended_entities || tweet.entities
+  const entities = tweet.extended_entities
 
   const user = tweet.user as FullUser
   options.switch_pm_parameter = `${id}`
