@@ -102,6 +102,8 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
       }
     }
 
+    console.log(tweet, type, wait, error)
+
     const entities = tweet.entities || tweet.extended_entities
 
     const isInMedia = (mediaType: string) => entities.media.some(
