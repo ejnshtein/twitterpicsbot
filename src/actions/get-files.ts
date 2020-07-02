@@ -22,9 +22,6 @@ composer.action(
         fromId: ctx.from.id,
         privateMode: ctx.state.user.private_mode
       })
-      const entities = tweet.extended_entities || tweet.entities
-
-      const user = tweet.user as FullUser
 
       switch (true) {
         case error instanceof Error: {
@@ -36,6 +33,9 @@ composer.action(
           )
         }
       }
+      const entities = tweet.entities || tweet.extended_entities
+
+      const user = tweet.user as FullUser
       let i = 0
       for (const entitie of entities.media) {
         if (entitie.type === 'photo') {
