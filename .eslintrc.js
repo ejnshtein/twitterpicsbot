@@ -3,11 +3,17 @@ module.exports = {
     node: true
   },
   extends: [
-    'standard'
+    'standard',
+    'plugin:@typescript-eslint/recommended'
   ],
+  parser: '@typescript-eslint/parser',
   plugins: [],
   parserOptions: {
-    ecmaVersion: 10,
+    ecmaVersion: 2020,
     sourceType: 'module'
+  },
+  rules: {
+    "camelcase": "warn",
+    "@typescript-eslint/no-unused-vars": "warn"
   }
 }
