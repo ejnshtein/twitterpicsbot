@@ -4,7 +4,9 @@
 
 # Commands
 
-_Empty here..._
+- `/info` - Get tweet info. (Creation date, user info, receiving media as files)
+- `/privateon` - Enable private mode. (If enabled tweets that you send to bot will not be added to your usage history)
+- `/privateoff` - Disable private mode.
 
 Just send a bunch of tweets to the bot ¯\\_(ツ)_/¯
 
