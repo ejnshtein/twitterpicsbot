@@ -78,9 +78,6 @@ composer.on(
           $sort: {
             _id: -1
           }
-        },
-        {
-          $limit: 12
         }
       ]
 
@@ -91,6 +88,12 @@ composer.on(
           }
         )
       }
+
+      aggregationQuery.push(
+        {
+          $limit: 12
+        }
+      )
 
       const result = await TweetModel.aggregate(aggregationQuery) as DBTweetInterface[]
 
@@ -118,6 +121,8 @@ composer.on(
               id: entitie.id_str,
               photo_url: getThumbUrl(entitie.media_url_https, 'large', 'jpg'),
               thumb_url: getThumbUrl(entitie.media_url_https),
+              thumb_height: entitie.sizes.thumb.h,
+              thumb_width: entitie.sizes.thumb.w,
               photo_height: entitie.sizes.large.h,
               photo_width: entitie.sizes.large.w,
               title: `${user.name}`,
@@ -130,7 +135,10 @@ composer.on(
               type: 'video',
               video_url,
               mime_type,
-              thumb_url: `${entitie.media_url_https}:thumb`,
+              // thumb_url: `${entitie.media_url_https}:thumb`,
+              thumb_url: getThumbUrl(entitie.media_url_https),
+              thumb_height: entitie.sizes.thumb.h,
+              thumb_width: entitie.sizes.thumb.w,
               title: `${user.name}`,
               video_duration: Math.floor(entitie.video_info.duration_millis / 1000),
               description: tweet.full_text,
@@ -144,6 +152,8 @@ composer.on(
               id: entitie.id_str,
               gif_url: entitie.video_info.variants.pop().url,
               thumb_url: entitie.media_url_https,
+              thumb_height: entitie.sizes.thumb.h,
+              thumb_width: entitie.sizes.thumb.w,
               title: `${user.name}`,
               caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweet.id_str}">${user.name}</a>`,
               parse_mode: 'HTML'

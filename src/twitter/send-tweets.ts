@@ -21,8 +21,6 @@ export type InputMedia = {
   type: string
   thumb: string
   url: string | VideoData
-  height: number
-  width: number
 }
 
 type Options = {
@@ -115,10 +113,8 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
         .map(
           image => ({
             type: 'photo',
-            thumb: getThumbUrl(image.media_url_https, 'thumb', 'jpg'),
-            url: getThumbUrl(image.media_url_https, 'large', 'jpg'),
-            width: image.sizes.large.w,
-            height: image.sizes.large.h
+            thumb: getThumbUrl(image.media_url_https),
+            url: getThumbUrl(image.media_url_https, 'large')
           }) as InputMedia
         )
       const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
@@ -156,9 +152,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           return {
             type: 'video',
             url: video_url,
-            thumb: video.media_url_https,
-            height: video.sizes.large.h,
-            width: video.sizes.large.w
+            thumb: getThumbUrl(video.media_url_https)
           } as InputMedia
         })
       const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
@@ -194,9 +188,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
         .map(gif => ({
           type: 'gif',
           url: gif.video_info.variants.pop().url,
-          thumb: gif.media_url_https,
-          height: gif.sizes.large.h,
-          width: gif.sizes.large.w
+          thumb: getThumbUrl(gif.media_url_https)
         }) as InputMedia)
       for (const gif of gifs) {
         results.push({
@@ -261,6 +253,10 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
       {
         text: 'ok',
         callback_data: 'delete'
+      },
+      {
+        text: 'Get as files',
+        callback_data: 'getfiles'
       }
     ]
   ]

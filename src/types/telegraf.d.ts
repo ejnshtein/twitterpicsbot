@@ -1,6 +1,6 @@
 import { TelegrafContext as TC } from 'telegraf/typings/context'
 import * as tt from 'telegraf/typings/telegram-types'
-import { User } from '@models/User'
+import { User } from '../models/User'
 export * from 'telegraf'
 
 export interface TelegrafContext extends TC {

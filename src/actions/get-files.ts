@@ -2,84 +2,77 @@ import { Composer } from 'telegraf'
 import { bot } from '../bot'
 import { parse } from 'querystring'
 import { TelegrafContext } from '../types/telegraf'
-import { getTweet } from '../twitter/get-tweet'
-import { FullUser } from 'twitter-d'
+import { sendMedia } from '../twitter/send-media'
 import { templates } from '../lib/templates'
-import { onLimitExceeded, InputMedia } from '../twitter/send-tweets'
-import { getThumbUrl } from '../lib/get-thumb-url'
-import getVideoUrl from '../lib/get-video-url'
 
 const composer = new Composer()
 
-composer.action(
-  /getfiles:(\S+)/i,
-  Composer.privateChat(
-    async (ctx: TelegrafContext) => {
-      await ctx.answerCbQuery('Working...')
-      const { id } = parse(ctx.match[1])
-      const { tweet, error, type, wait } = await getTweet({
-        tweetId: id as string,
-        fromId: ctx.from.id,
-        privateMode: ctx.state.user.private_mode
-      })
+const tweetTest = /twitter\.com\/\S+\/([0-9]+)/i
 
-      switch (true) {
-        case error instanceof Error: {
-          return ctx.reply(templates.error(error))
-        }
-        case type === 'limit exceeded': {
-          return ctx.reply(
-            onLimitExceeded({ tweets: [[id as string]], wait })
+composer
+  .action(
+    /getfiles:(\S+)/i,
+    Composer.privateChat(
+      async (ctx: TelegrafContext) => {
+        const { id } = parse(ctx.match[1])
+        try {
+          await sendMedia(
+            ctx,
+            {
+              tweetIds: [id as string]
+            }
           )
+          await ctx.answerCbQuery('')
+        } catch (e) {
+          return ctx.answerCbQuery(templates.error(e), true)
         }
       }
-      const entities = tweet.extended_entities
-
-      const user = tweet.user as FullUser
-      let i = 0
-      for (const entitie of entities.media) {
-        if (entitie.type === 'photo') {
-          await ctx.replyWithDocument(
-            {
-              filename: `${user.screen_name}-${id}-photo-${i}.jpg`,
-              url: getThumbUrl(entitie.media_url_https, 'large', 'jpg')
-            },
-            {
-              caption: `<a href="https://twitter.com/${user.screen_name}/status/${id}">${user.name}</a> photo${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-              thumb: getThumbUrl(entitie.media_url_https, 'thumb', 'jpg'),
-              parse_mode: 'HTML'
-            }
-          )
-        } else if (entitie.type === 'video') {
-          const { video_url, mime_type } = getVideoUrl(entitie.video_info)
-          await ctx.replyWithDocument(
-            {
-              filename: `${user.screen_name}-${id}-video-${i}.${mime_type}`,
-              url: video_url
-            },
-            {
-              caption: `<a href="https://twitter.com/${user.screen_name}/status/${id}">${user.name}</a> video${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-              thumb: entitie.media_url_https,
-              parse_mode: 'HTML'
-            }
-          )
-        } else if (entitie.type === 'animated_gif') {
-          await ctx.replyWithDocument(
-            {
-              filename: `${user.screen_name}-${id}-gif-${i}.gif`,
-              url: entitie.video_info.variants.pop().url
-            },
-            {
-              caption: `<a href="https://twitter.com/${user.screen_name}/status/${id}">${user.name}</a> gif${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-              thumb: entitie.media_url_https,
-              parse_mode: 'HTML'
-            }
-          )
-        }
-        i++
-      }
-    }
+    )
   )
-)
+  .action(
+    'getfiles',
+    Composer.privateChat(
+      async (ctx: TelegrafContext) => {
+        if (!ctx.callbackQuery.message.reply_to_message) {
+          return ctx.answerCbQuery('Replied message not found.')
+        }
+        const tweetIds = ctx.callbackQuery.message.reply_to_message.entities
+          .filter(
+            entitie => (
+              entitie.type === 'text_link' && tweetTest.test(entitie.url)
+            ) || (
+              entitie.type === 'url' && tweetTest.test(
+                ctx.callbackQuery.message.reply_to_message.text.slice(
+                  entitie.offset,
+                  entitie.offset + entitie.length
+                )
+              )
+            )
+          )
+          .map(
+            entitie => (
+              entitie.type === 'text_link' && entitie.url.match(tweetTest)[1]
+            ) || (
+              entitie.type === 'url' && ctx.callbackQuery.message.reply_to_message.text.slice(
+                entitie.offset,
+                entitie.offset + entitie.length
+              ).match(tweetTest)[1]
+            )
+          )
+        if (tweetIds.length === 0) {
+          return ctx.answerCbQuery('Tweets not found.')
+        }
+        try {
+          await sendMedia(
+            ctx,
+            { tweetIds }
+          )
+          await ctx.answerCbQuery('')
+        } catch (e) {
+          return ctx.answerCbQuery(templates.error(e), true)
+        }
+      }
+    )
+  )
 
 bot.use(composer.middleware())
