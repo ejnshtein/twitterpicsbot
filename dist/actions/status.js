@@ -45,11 +45,23 @@ var Tweet_1 = require("../models/Tweet");
 var templates_1 = require("../lib/templates");
 var uptime = function () {
     var duration = date_fns_1.intervalToDuration({
-        start: Date.now() - process.uptime(),
+        start: Date.now() - Math.floor(process.uptime() * 1000),
         end: Date.now()
     });
+    var format = Object.entries(duration)
+        .filter(function (_a) {
+        var _ = _a[0], value = _a[1];
+        return value > 0;
+    })
+        .map(function (_a) {
+        var name = _a[0];
+        return name;
+    });
+    if (format.length === 0) {
+        format.push('seconds');
+    }
     return date_fns_1.formatDuration(duration, {
-        format: ['days', 'hours', 'minutes'],
+        format: format,
         zero: true
     });
 };
@@ -80,7 +92,7 @@ var statusmessage = function () { return __awaiter(void 0, void 0, void 0, funct
                 text = '';
                 text += "<b>Ram usage:</b> " + ramusage() + " MB\n";
                 text += "<b>Uptime:</b> " + uptime() + "\n";
-                text += "<b>Server time:</b> " + date_fns_timezone_1.formatToTimeZone(new Date(), 'YYYY MM DD hh:mm:ss.SSS', { timeZone: 'Europe/Berlin' }) + "\n";
+                text += "<b>Server time:</b> " + date_fns_timezone_1.formatToTimeZone(new Date(), 'YYYY-MM-DD hh:mm:ss.SSS', { timeZone: 'Europe/Berlin' }) + " UTC\n";
                 return [4 /*yield*/, tgusage()];
             case 1:
                 _a = _b.sent(), user = _a.user, tweet = _a.tweet;

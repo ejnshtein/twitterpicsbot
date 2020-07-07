@@ -9,13 +9,19 @@ import { templates } from '../lib/templates'
 
 const uptime = (): string => {
   const duration = intervalToDuration({
-    start: Date.now() - process.uptime(),
+    start: Date.now() - Math.floor(process.uptime() * 1000),
     end: Date.now()
   })
+  const format = Object.entries(duration)
+    .filter(([_, value]) => value > 0)
+    .map(([name]) => name)
+  if (format.length === 0) {
+    format.push('seconds')
+  }
   return formatDuration(
     duration,
     {
-      format: ['days', 'hours', 'minutes'],
+      format,
       zero: true
     }
   )
@@ -42,9 +48,9 @@ const statusmessage = async (): Promise<string> => {
   text += `<b>Uptime:</b> ${uptime()}\n`
   text += `<b>Server time:</b> ${formatToTimeZone(
     new Date(),
-    'YYYY MM DD hh:mm:ss.SSS',
+    'YYYY-MM-DD hh:mm:ss.SSS',
     { timeZone: 'Europe/Berlin' }
-)}\n`
+)} UTC\n`
   const { user, tweet } = await tgusage()
   text += `<b>In use by</b> ${user} user(s)\n`
   text += `<b>Saved</b> ${tweet} tweet(s)`
