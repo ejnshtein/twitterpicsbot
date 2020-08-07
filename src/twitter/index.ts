@@ -1,15 +1,14 @@
 import { createStore, createEffect, createEvent } from 'effector'
 import { APILimits } from 'twitter'
 import { scheduleJob } from 'node-schedule'
-import env from '../env.js'
-import { Twimo, lookupTweets, twget } from '@yarnaimo/twimo'
+import { Twimo, twget } from '@yarnaimo/twimo'
 
 export const twimo = Twimo({
-  consumerKey: env.TWITTER_CONSUMER_KEY,
-  consumerSecret: env.TWITTER_CONSUMER_SECRET
+  consumerKey: process.env.TWITTER_CONSUMER_KEY,
+  consumerSecret: process.env.TWITTER_CONSUMER_SECRET
 })({
-  token: env.TWITTER_ACCESS_TOKEN_KEY,
-  tokenSecret: env.TWITTER_ACCESS_TOKEN_SECRET
+  token: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  tokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 })
 
 const getLimits = (): Promise<APILimits> => twget(twimo, 'application/rate_limit_status')
