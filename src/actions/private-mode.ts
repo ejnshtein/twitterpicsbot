@@ -130,7 +130,8 @@ composer
     Composer.privateChat(
       async (ctx: TelegrafContext) => {
         return ctx.answerCbQuery(
-          'When Private mode is on tweets that you send to bot, and in inline mode, will not be added to your tweets history.'
+          'When Private mode is on tweets that you send to bot and in inline mode will not be added to your tweets history.',
+          true
         )
       }
     )
