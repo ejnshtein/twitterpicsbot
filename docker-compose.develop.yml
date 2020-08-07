@@ -1,0 +1,20 @@
+version: '3'
+
+services: 
+  twitter-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: always
+    environment: 
+      TOKEN: $TOKEN
+      DATABASE_URL: $DATABASE_URL
+      TWITTER_CONSUMER_KEY: $TWITTER_CONSUMER_KEY
+      TWITTER_CONSUMER_SECRET: $TWITTER_CONSUMER_SECRET
+      TWITTER_ACCESS_TOKEN_KEY: $TWITTER_ACCESS_TOKEN_KEY
+      TWITTER_ACCESS_TOKEN_SECRET: $TWITTER_ACCESS_TOKEN_SECRET
+      DEV: 'true'
+    env_file: 
+      .env
+    volumes:
+      - .:/usr/src/app
