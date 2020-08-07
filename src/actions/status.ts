@@ -64,8 +64,9 @@ composer
     'status',
     async (ctx: TelegrafContext) => {
       try {
+        const message = await statusmessage()
         await ctx.reply(
-          await statusmessage(),
+          message,
           {
             parse_mode: 'HTML',
             reply_markup: {
@@ -89,8 +90,9 @@ composer
     'status',
     async (ctx: TelegrafContext) => {
       try {
+        const message = await statusmessage()
         await ctx.editMessageText(
-          await statusmessage(),
+          message,
           {
             parse_mode: 'HTML',
             reply_markup: {
