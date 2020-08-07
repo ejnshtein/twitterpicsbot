@@ -1,1 +1,0 @@
-{"version":3,"file":"send-error.js","sourceRoot":"","sources":["../../src/inline/send-error.ts"],"names":[],"mappings":";;;AAEa,QAAA,SAAS,GAAG,UAAC,KAAY,IAA+B,OAAA,CAAC;IACpE,IAAI,EAAE,SAAS;IACf,EAAE,EAAE,GAAG;IACP,KAAK,EAAE,QAAQ;IACf,WAAW,EAAE,6BAA2B,KAAK,CAAC,OAAS;IACvD,qBAAqB,EAAE;QACrB,YAAY,EAAE,6BAA2B,KAAK,CAAC,OAAS;KACzD;CACF,CAAC,EARmE,CAQnE,CAAA"}
