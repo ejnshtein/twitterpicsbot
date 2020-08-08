@@ -21,4 +21,4 @@ jobs:
         script: |
           cd bots/twitterpicsbot
           git pull
-          docker-compose -f docker-compose.yml up --force-recreate -d
+          docker-compose -f docker-compose.yml up --build --force-recreate -d
