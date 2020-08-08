@@ -19,6 +19,11 @@ const composer = new Composer() as TGFComposer<TelegrafContext>
 
 type fnCatchThrow = (fn: (ctx: TelegrafContext) => Promise<unknown>) => (ctx: TelegrafContext) => Promise<void>
 
+type InlineQuery = {
+  tweets: DBTweetInterface[],
+  saved_tweets_count: { tweet: number }
+}
+
 const catchThrow: fnCatchThrow = fn => async ctx => {
   try {
     await fn(ctx)
@@ -57,6 +62,7 @@ composer.on(
         users: ctx.from.id,
         'tweet.extended_entities.media': { $exists: true }
       }
+      const { private_mode } = ctx.state.user
 
       const { query: userQuery } = ctx.inlineQuery
       if (userQuery.includes('-u')) {
@@ -95,23 +101,41 @@ composer.on(
         }
       )
 
-      const result = await TweetModel.aggregate(aggregationQuery) as DBTweetInterface[]
+      const InlineAggregation: any[] = [
+        {
+          $facet: {
+            tweets: aggregationQuery,
+            saved_tweets_count: [
+              {
+                $match: query
+              },
+              {
+                $count: 'tweet'
+              }
+            ]
+          }
+        }
+      ]
 
-      const next_offset = result.length < 12 ? 'none' : `${skip + 1}`
+      const [result] = await TweetModel.aggregate(InlineAggregation) as unknown as InlineQuery[]
+      const { saved_tweets_count, tweets } = result
+      const next_offset = tweets.length < 12 ? 'none' : `${skip + 1}`
 
       const inlineQueryResults: InlineQueryResult[] = []
       const options: ExtraAnswerInlineQuery = {
         cache_time: 5,
         is_personal: false,
-        next_offset
+        next_offset,
+        switch_pm_text: `${private_mode ? 'private mode | ' : ''}${saved_tweets_count[0].tweet} tweets saved`,
+        switch_pm_parameter: 'stats'
       }
 
-      if (ctx.state.user.private_mode) {
+      if (private_mode) {
         options.is_personal = true
-        options.cache_time = 30
+        options.cache_time = 5
       }
 
-      for (const { tweet } of result) {
+      for (const { tweet } of tweets) {
         const user = tweet.user as FullUser
         const entities = tweet.extended_entities
         for (const entitie of entities.media) {
