@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package.json /usr/src/app
 
-RUN yarn install
+RUN yarn install --network-timeout 100000
 
 ADD . /usr/src/app
 
