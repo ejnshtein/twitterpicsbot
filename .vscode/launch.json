@@ -13,6 +13,7 @@
       ],
       "program": "${workspaceFolder}/dist/app.js",
       "preLaunchTask": "${defaultBuildTask}",
+      "envFile": "${workspaceFolder}/.env",
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ]
