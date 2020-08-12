@@ -123,7 +123,7 @@ composer.on(
 
       const inlineQueryResults: InlineQueryResult[] = []
       const options: ExtraAnswerInlineQuery = {
-        cache_time: 5,
+        cache_time: 15,
         is_personal: false,
         next_offset,
         switch_pm_text: `${private_mode ? 'private mode | ' : ''}${saved_tweets_count[0].tweet} tweets saved`,
