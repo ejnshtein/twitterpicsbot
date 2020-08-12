@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node dist/app.js",
-    "build-ts": "tsc --skipLibCheck",
-    "watch-ts": "tsc -w --skipLibCheck",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
     "watch-js": "nodemon ./dist/app.js",
     "develop": "concurrently -i -k -p \"[{name}]\" -n \"Node, TypeScript\" -c \"yellow.bold,cyan.bold\" \"yarn watch-js\" \"yarn watch-ts\""
   },

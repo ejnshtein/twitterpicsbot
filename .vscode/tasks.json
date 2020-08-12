@@ -6,7 +6,6 @@
       "type": "typescript",
       "tsconfig": "tsconfig.json",
       "problemMatcher": ["$tsc"],
-      "command":"tsc --skipLibCheck ${file}",
       "group": {
         "kind": "build",
         "isDefault": true

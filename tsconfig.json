@@ -11,6 +11,7 @@
     "moduleResolution": "Node",
     "outDir": "dist",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "*": [
         "node_modules/*",
