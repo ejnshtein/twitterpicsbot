@@ -40,21 +40,21 @@ export const sendMedia = async (
 
     const user = tweet.user as FullUser
     let i = 0
-    for (const entitie of entities.media) {
-      if (entitie.type === 'photo') {
+    for (const entity of entities.media) {
+      if (entity.type === 'photo') {
         await ctx.replyWithDocument(
           {
             filename: `${user.screen_name}-${tweetId}-photo-${i}.jpg`,
-            url: getThumbUrl(entitie.media_url_https, 'large', 'jpg')
+            url: getThumbUrl(entity.media_url_https, 'medium', 'jpg')
           },
           {
             caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a> photo${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-            thumb: getThumbUrl(entitie.media_url_https),
+            thumb: getThumbUrl(entity.media_url_https),
             parse_mode: 'HTML'
           }
         )
-      } else if (entitie.type === 'video') {
-        const { video_url, mime_type } = getVideoUrl(entitie.video_info)
+      } else if (entity.type === 'video') {
+        const { video_url, mime_type } = getVideoUrl(entity.video_info)
         await ctx.replyWithDocument(
           {
             filename: `${user.screen_name}-${tweetId}-video-${i}.${mime_type}`,
@@ -62,19 +62,19 @@ export const sendMedia = async (
           },
           {
             caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a> video${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-            thumb: getThumbUrl(entitie.media_url_https),
+            thumb: getThumbUrl(entity.media_url_https),
             parse_mode: 'HTML'
           }
         )
-      } else if (entitie.type === 'animated_gif') {
+      } else if (entity.type === 'animated_gif') {
         await ctx.replyWithDocument(
           {
             filename: `${user.screen_name}-${tweetId}-gif-${i}.gif`,
-            url: entitie.video_info.variants.pop().url
+            url: entity.video_info.variants.pop().url
           },
           {
             caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a> gif${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,
-            thumb: getThumbUrl(entitie.media_url_https),
+            thumb: getThumbUrl(entity.media_url_https),
             parse_mode: 'HTML'
           }
         )
