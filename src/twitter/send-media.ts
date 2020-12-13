@@ -45,7 +45,7 @@ export const sendMedia = async (
         await ctx.replyWithDocument(
           {
             filename: `${user.screen_name}-${tweetId}-photo-${i}.jpg`,
-            url: getThumbUrl(entity.media_url_https, 'medium', 'jpg')
+            url: getThumbUrl(entity.media_url_https, 'large', 'jpg')
           },
           {
             caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweetId}">${user.name}</a> photo${entities.media.length > 1 ? ` (${i + 1}/${entities.media.length})` : ''}`,

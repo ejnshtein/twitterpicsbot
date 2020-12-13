@@ -114,7 +114,7 @@ export const sendTweets = async (ctx: TelegrafContext, { text, tweetIds, message
           image => ({
             type: 'photo',
             thumb: getThumbUrl(image.media_url_https),
-            url: getThumbUrl(image.media_url_https, 'large')
+            url: getThumbUrl(image.media_url_https, 'medium')
           }) as InputMedia
         )
       const lastAlbumIndex = findLastIndex(results, el => el._ === 'album') as number
