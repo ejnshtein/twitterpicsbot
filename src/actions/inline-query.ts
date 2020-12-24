@@ -143,12 +143,12 @@ composer.on(
             inlineQueryResults.push({
               type: 'photo',
               id: entitie.id_str,
-              photo_url: getThumbUrl(entitie.media_url_https, 'large', 'jpg'),
+              photo_url: getThumbUrl(entitie.media_url_https, 'medium', 'jpg'),
               thumb_url: getThumbUrl(entitie.media_url_https),
               thumb_height: entitie.sizes.thumb.h,
               thumb_width: entitie.sizes.thumb.w,
-              photo_height: entitie.sizes.large.h,
-              photo_width: entitie.sizes.large.w,
+              photo_height: entitie.sizes.medium.h,
+              photo_width: entitie.sizes.medium.w,
               title: `${user.name}`,
               caption: `<a href="https://twitter.com/${user.screen_name}/status/${tweet.id_str}">${user.name}</a>`,
               parse_mode: 'HTML'
