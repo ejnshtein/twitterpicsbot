@@ -1,4 +1,4 @@
-import { store, reduceRemaining, twimo } from '.'
+import { store, reduceRemaining, twimo } from './index.js'
 import sleep from '../lib/sleep.js'
 import { Status as Tweet, Status } from 'twitter-d'
 import { TweetModel } from '../models/Tweet.js'

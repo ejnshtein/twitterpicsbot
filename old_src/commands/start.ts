@@ -1,7 +1,7 @@
 import { Composer } from 'telegraf'
 import { bot } from '../bot.js'
-import { TelegrafContext } from '../types/telegraf'
-import { sendTweets } from '../twitter/send-tweets'
+import { TelegrafContext } from '../types/telegraf.js'
+import { sendTweets } from '../twitter/send-tweets.js'
 
 const composer = new Composer()
 

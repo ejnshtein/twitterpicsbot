@@ -15,11 +15,11 @@
     "paths": {
       "*": [
         "node_modules/*",
-        "src/types/*"
+        "old_src/types/*"
       ]
     }
   },
   "include": [
-    "src/**/*"
+    "old_src/**/*"
   ]
 }

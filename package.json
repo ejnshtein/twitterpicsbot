@@ -1,19 +1,16 @@
 {
   "name": "twitter-pics-bot",
-  "version": "3.0.1",
-  "description": "",
-  "main": "app.js",
+  "version": "4.0.0",
   "scripts": {
-    "start": "node dist/app.js",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "watch-js": "nodemon ./dist/app.js",
-    "develop": "concurrently -i -k -p \"[{name}]\" -n \"Node, TypeScript\" -c \"yellow.bold,cyan.bold\" \"yarn watch-js\" \"yarn watch-ts\""
+    "start": "tsx src/app.tsx",
+    "dev": "tsx watch --env-file=./.env src/app.ts",
+    "dev:debug": "tsx watch --inspect-brk=0.0.0.0:9234 --env-file=./.env src/app.ts",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [],
-  "type": "commonjs",
+  "type": "module",
   "engines": {
-    "node": ">=13.5"
+    "node": ">=20"
   },
   "repository": {
     "type": "git",
@@ -22,38 +19,13 @@
   "author": "ejnshtein",
   "license": "MIT",
   "dependencies": {
-    "@telegraf/core": "^1.1.0",
-    "@typegoose/typegoose": "^7.2.0",
-    "@yarnaimo/twimo": "^4.1.3",
-    "cheerio": "^1.0.0-rc.3",
-    "date-fns": "^2.14.0",
-    "date-fns-timezone": "^0.1.4",
-    "dotenv": "^8.2.0",
-    "dotenv-parse-variables": "^0.3.1",
-    "effector": "^21.0.3",
-    "effector-esm": "^1.0.0",
-    "module-alias": "^2.2.2",
-    "mongodb": "^3.5.9",
-    "mongoose": "^5.9.17",
-    "node-schedule": "^1.3.2",
-    "telegraf": "^3.38.0",
-    "twitter": "^1.7.1"
+    "envsafe": "^2.0.3",
+    "grammy": "^1.35.1",
+    "grammy-middlewares": "^1.0.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/preset-typescript": "^7.10.4",
-    "@types/eslint": "^7.2.0",
-    "@types/mongodb": "^3.5.20",
-    "@types/mongoose": "^5.7.24",
-    "@types/node-schedule": "^1.3.0",
-    "@types/twitter": "^1.7.0",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
-    "@typescript-eslint/parser": "^3.7.0",
-    "babel-plugin-add-import-extension": "^1.4.1",
-    "concurrently": "^5.2.0",
-    "nodemon": "^2.0.4",
-    "standard": "^14.3.4",
-    "twitter-d": "^0.4.0",
-    "typescript": "^3.9.5"
+    "@types/node": "^20.11.17",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
   }
 }
